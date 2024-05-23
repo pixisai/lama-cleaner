@@ -47,13 +47,15 @@ class LaMa(InpaintModel):
         image = norm_img(image)
         mask = norm_img(mask)
 
-        mask = (mask > 0) * 1
-        image = torch.from_numpy(image).unsqueeze(0).to(self.device)
-        mask = torch.from_numpy(mask).unsqueeze(0).to(self.device)
+        # mask = (mask > 0) * 1
+        # image = torch.from_numpy(image).unsqueeze(0).to(self.device)
+        # mask = torch.from_numpy(mask).unsqueeze(0).to(self.device)
+        inpainted_images = self.model(image, mask)
 
-        inpainted_image = self.model(image, mask)
-
-        cur_res = inpainted_image[0].permute(1, 2, 0).detach().cpu().numpy()
-        cur_res = np.clip(cur_res * 255, 0, 255).astype("uint8")
-        cur_res = cv2.cvtColor(cur_res, cv2.COLOR_RGB2BGR)
-        return cur_res
+        cur_res_list = []
+        for inpainted_image in inpainted_images:
+            cur_res = inpainted_image[0].permute(1, 2, 0).detach().cpu().numpy()
+            cur_res = np.clip(cur_res * 255, 0, 255).astype("uint8")
+            cur_res = cv2.cvtColor(cur_res, cv2.COLOR_RGB2BGR)
+            cur_res_list.append(cur_res)
+        return cur_res_list
