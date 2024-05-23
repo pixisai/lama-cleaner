@@ -38,19 +38,20 @@ class LaMa(InpaintModel):
     def is_downloaded() -> bool:
         return os.path.exists(get_cache_path_by_url(LAMA_MODEL_URL))
 
-    def forward(self, image, mask, config: Config):
+    def forward(self, images, masks, config: Config):
         """Input image and output image have same size
-        image: [H, W, C] RGB
-        mask: [H, W]
+        image: [B, H, W, C] RGB
+        mask: [B, H, W]
         return: BGR IMAGE
         """
-        image = norm_img(image)
-        mask = norm_img(mask)
+        
+        images = [norm_img(image) for image in images]
+        masks = [norm_img(mask for mask in masks)]
 
-        mask = (mask > 0) * 1
-        image = torch.from_numpy(image).to(self.device)
-        mask = torch.from_numpy(mask).to(self.device)
-        inpainted_images = self.model(image, mask)
+        masks = (masks > 0) * 1
+        images = torch.from_numpy(images).to(self.device)
+        masks = torch.from_numpy(masks).to(self.device)
+        inpainted_images = self.model(images, masks)
 
         cur_res_list = []
         for inpainted_image in inpainted_images:
