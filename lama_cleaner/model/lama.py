@@ -47,9 +47,9 @@ class LaMa(InpaintModel):
         image = norm_img(image)
         mask = norm_img(mask)
 
-        # mask = (mask > 0) * 1
-        # image = torch.from_numpy(image).unsqueeze(0).to(self.device)
-        # mask = torch.from_numpy(mask).unsqueeze(0).to(self.device)
+        mask = (mask > 0) * 1
+        image = torch.from_numpy(image).to(self.device)
+        mask = torch.from_numpy(mask).to(self.device)
         inpainted_images = self.model(image, mask)
 
         cur_res_list = []
